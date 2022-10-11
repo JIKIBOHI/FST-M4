@@ -1,0 +1,74 @@
+root@8fded457b3b2:/# hive
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/usr/local/apache-hive-3.1.2-bin/lib/log4j-slf4j-impl-2.10.0.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hadoop-3.3.1/share/hadoop/common/lib/slf4j-log4j12-1.7.30.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Hive Session ID = 27a1c893-b8b3-4884-8722-b50e314d7c63
+
+Logging initialized using configuration in jar:file:/usr/local/apache-hive-3.1.2-bin/lib/hive-common-3.1.2.jar!/hive-log4j2.properties Async: true
+Hive Session ID = 8dd0a231-5c2e-49ae-bda7-07888888cf1d
+Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+hive> CREATE TABLE files (line STRING);
+OK
+Time taken: 1.673 seconds
+hive> LOAD DATA LOCAL INPATH '/file01.txt' INTO TABLE files;
+Loading data to table default.files
+OK
+Time taken: 1.584 seconds
+hive> CREATE TABLE word_counts AS
+    > SELECT word, count(1) AS count FROM
+    > (SELECT explode(split(line, ' ')) AS word FROM files) w
+    > GROUP BY word
+    > ORDER BY word;
+Query ID = root_20220921152140_e73ff65e-d33f-4d18-9a47-664f656076b0
+Total jobs = 2
+Launching Job 1 out of 2
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1663772215587_0001, Tracking URL = http://8fded457b3b2:8088/proxy/application_1663772215587_0001/
+Kill Command = /usr/local/hadoop/bin/mapred job  -kill job_1663772215587_0001
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2022-09-21 15:21:59,662 Stage-1 map = 0%,  reduce = 0%
+2022-09-21 15:22:13,417 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 10.0 sec
+2022-09-21 15:22:31,658 Stage-1 map = 100%,  reduce = 67%, Cumulative CPU 27.08 sec
+2022-09-21 15:22:35,881 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 33.83 sec
+MapReduce Total cumulative CPU time: 33 seconds 830 msec
+Ended Job = job_1663772215587_0001
+Launching Job 2 out of 2
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1663772215587_0002, Tracking URL = http://8fded457b3b2:8088/proxy/application_1663772215587_0002/
+Kill Command = /usr/local/hadoop/bin/mapred job  -kill job_1663772215587_0002
+Hadoop job information for Stage-2: number of mappers: 1; number of reducers: 1
+2022-09-21 15:22:54,077 Stage-2 map = 0%,  reduce = 0%
+2022-09-21 15:23:01,367 Stage-2 map = 100%,  reduce = 0%, Cumulative CPU 3.14 sec
+2022-09-21 15:23:09,729 Stage-2 map = 100%,  reduce = 100%, Cumulative CPU 5.63 sec
+MapReduce Total cumulative CPU time: 5 seconds 630 msec
+Ended Job = job_1663772215587_0002
+Moving data to directory hdfs://8fded457b3b2:9000/user/hive/warehouse/word_counts
+MapReduce Jobs Launched:
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 33.83 sec   HDFS Read: 8170 HDFS Write: 166 SUCCESS
+Stage-Stage-2: Map: 1  Reduce: 1   Cumulative CPU: 5.63 sec   HDFS Read: 7297 HDFS Write: 97 SUCCESS
+Total MapReduce CPU Time Spent: 39 seconds 460 msec
+OK
+Time taken: 91.605 seconds
+hive> SELECT * FROM word_count;
+FAILED: SemanticException [Error 10001]: Line 1:14 Table not found 'word_count'
+hive> SELECT * FROM word_counts;
+OK
+Bye     1
+Hello   1
+World   2
+Time taken: 0.279 seconds, Fetched: 3 row(s)
+hive>
